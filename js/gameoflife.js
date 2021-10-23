@@ -65,17 +65,51 @@ const printCells = (state) => {
  
 };
 
-const getNeighborsOf = ([x, y]) => {};
+const getNeighborsOf = ([x, y]) =>[
+    [x-1,y+1], [x,y+1], [x+1,y+1],
+    [x-1,y],            [x+1,y],
+    [x-1,y-1], [x,y-1], [x+1,y-1]
+  ];
 
-const getLivingNeighbors = (cell, state) => {};
+const getLivingNeighbors = (cell, state) => {
+  return getNeighborsOf(cell).filter((n)=>contains.bind(state)(n));
+};
 
-const willBeAlive = (cell, state) => {};
+const willBeAlive = (cell, state) => {
+  const livingN = getLivingNeighbors(cell,state)
+  
+  return (
+    livingN.length === 3 || (contains.call(state,cell) && livingN.length === 2)
+  )
+};
 
-const calculateNext = (state) => {};
+const calculateNext = (state) => {
+  const {bottomLeft,topRight} = corners(state)
+  let res = [];
+  for(let y = topRight[1] + 1 ; y >= bottomLeft[1] - 1; y--){
+   
+    for(let x= bottomLeft[0] - 1 ; x<= topRight[0] + 1; x++){
+      res = res.concat(willBeAlive([x,y],state) ? [[x,y]] : []);
+    }
+  }
 
-const iterate = (state, iterations) => {};
+  return res
+};
 
-const main = (pattern, iterations) => {};
+const iterate = (state, iterations) => {
+  const Nstate = [state];
+
+  for(let i = 0; i < iterations;i++){
+    Nstate.push(calculateNext(Nstate[Nstate.length - 1]));
+  }
+
+  return Nstate;
+};
+
+const main = (pattern, iterations) => {
+  const res = iterate(startPatterns[pattern],iterations)
+  res.forEach(n=> console.log(printCells(n)));
+};
 
 const startPatterns = {
     rpentomino: [
